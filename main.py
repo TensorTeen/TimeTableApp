@@ -1,7 +1,7 @@
 import numpy as np
 from APITest import createEvent
 import json 
-
+from easygui import *
 
 days = {
     "Sunday" : 0,
@@ -31,7 +31,7 @@ class Slot():
     def save(self) -> None:
         details = {
             self.slotName : {
-                "slotTimes" : self.slotTimes,
+                "slotTimes" : self.slotTimes.tolist(),
                 "course" : self.course,
                 "reccurence":self.rec,
             }
@@ -63,10 +63,47 @@ class Course():
                 "slot" : self.slot,
                 "course" : self.course,
                 "location" : self.loc,
-                "description": self.desc
+                "description": self.desc,
             }
         }
         with open("courses.json","a+") as f:
             json.dump(details,f,indent=6)
     
-    
+
+def createSlot():
+    text = "Enter the following details"
+    title = "Slot Creation Window"  
+    input_list = ["Slot Name : ",]
+    #SlotDetails = multenterbox(text, title, input_list)
+    SlotDetails = ["A"]
+    input_list = []
+    for i in days:
+        input_list.extend([i + "Start ", i + " End"])
+    #SlotTimes = np.array(multenterbox(text,title,input_list))
+    SlotTimes = np.array(['', '', '08:00', '08:50', '13:00', '13:50', '', '', '11:00', '11:50', '10:00',
+ '10:50', '', '',]).reshape(7,2)
+    print(SlotDetails,SlotTimes)
+    slot_1 = Slot(SlotDetails[0],SlotTimes)
+    slot_1.save()
+
+
+def createCourse():
+    text = "Enter the following details"
+    title = "Slot Creation Window"  
+    input_list = ["Slot Name : ",]
+    #SlotDetails = multenterbox(text, title, input_list)
+    SlotDetails = ["A"]
+    input_list = []
+    for i in days:
+        input_list.extend([i + "Start ", i + " End"])
+    #SlotTimes = np.array(multenterbox(text,title,input_list))
+    SlotTimes = np.array(['', '', '08:00', '08:50', '13:00', '13:50', '', '', '11:00', '11:50', '10:00',
+ '10:50', '', '',]).reshape(7,2)
+    course_1 = Slot(SlotDetails[0],SlotTimes)
+    course_1.save()
+
+with open("slots.json","r") as f: 
+    l = json.load(f)
+    print(l)
+
+createSlot()
