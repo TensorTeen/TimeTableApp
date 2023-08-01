@@ -1,6 +1,8 @@
 import numpy as np
 #from APITest import createEvent
 import json
+
+#Using ical gives generality, but recurring events feature in google calendar not supported
 from icalendar import Calendar, Event
 import datetime
 
@@ -139,9 +141,9 @@ class Calendar():
                     self.icalObj.add_component(event)
             
             day += datetime.timedelta(days = 1)
-            print(day)
-        pass
-        #TODO
+
+#TODO add exams functionality
+
 
 # Example usage
 # slot = Slot("A", [TimeRange(1, datetime.time(10, 0), datetime.time(10, 50))])
