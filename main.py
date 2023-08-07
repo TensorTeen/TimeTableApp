@@ -17,6 +17,7 @@ days = {
     "Sunday": 7,
 }
 
+SLOTFILE = "slot.txt"
 
 class Slot():
     def __init__(self, slotName: str, slotTimes: "np.array of TimeRange", course=None, rec="WEEKLY") -> None: #I suggest slotTimes as type WeekTime
@@ -26,7 +27,62 @@ class Slot():
         self.rec = rec
         if self.course:
             self.occupied = True
+            
+    def addTimes(t1, t2):
+        hours = t1.hour + t2.hour
+        minutes = t1.minute + t2.minute
+        hours += minutes // 60
+        minutes %= 60
+        new_time = datetime.time(hour=hours, minute=minutes)
+        return new_time
 
+    def createSlot(periodLen = 50): #periodLen minutes
+        slotfile = open(SLOTFILE, 'a')
+        
+        slotfile.write("SLOT START\n")
+        name = input("Enter name of slot: ")
+        slotfile.write(name+"\n")
+        slotTimes=[]
+        while "y" in input("Add slot period?: ").lower():
+            day = int(input("Enter day number: "))
+            time = int(input("Enter start time: "))#militarytime format
+            slotfile.writelines(["NEW PERIOD\n", str(day)+"\n", str(time)+"\n"])
+            startTime = datetime.time(int(time//100), int(time%100))
+            endTime = Slot.addTimes(startTime, datetime.time(0, periodLen))
+            slotTimes.append(TimeRange(day, startTime, endTime))
+        
+        slotfile.write("SLOT END\n")
+        slotfile.close()
+        return Slot(name, slotTimes)
+    
+    def loadSlots(slotfile = "slot.txt"):
+        file = open(slotfile, "r")
+        d={}
+        while True:
+            line  = file.readline().strip()
+            if line == "":
+                break
+            elif line == "SLOT START":
+                slotTimes = []
+                name = file.readline().strip()
+                periodLen = int(file.readline().strip())
+                line  = file.readline().strip()
+                while line != "SLOT END":
+                    if line == "NEW PERIOD":
+                        day = int(file.readline().strip())
+                        time = int(file.readline().strip())
+                        startTime = datetime.time(int(time//100), int(time%100))
+                        endTime = Slot.addTimes(startTime, datetime.time(0, periodLen))                        
+                        slotTimes.append(TimeRange(day, startTime, endTime))
+                    line = file.readline().strip()
+                else:
+                    d[name] = Slot(name, slotTimes)
+                
+                    
+                        
+        #TODO
+        return d
+    
     def retrieveTime(self, day: int) -> np.array:
         return self.slotTimes[day-1] #why -1 ?
 
@@ -150,7 +206,7 @@ class Calendar():
 # course = Course("MA", slot)
 # calendar= Calendar(datetime.date(2024, 7, 31), datetime.date(2024, 8, 10), [course] )
 # calendar.createEvents(calendar.courses[0])
-        
-        
-        
+
+
+
         
