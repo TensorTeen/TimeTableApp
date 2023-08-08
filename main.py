@@ -42,6 +42,7 @@ class Slot():
         slotfile.write("SLOT START\n")
         name = input("Enter name of slot: ")
         slotfile.write(name+"\n")
+        slotfile.write(str(periodLen) + "\n")
         slotTimes=[]
         while "y" in input("Add slot period?: ").lower():
             day = int(input("Enter day number: "))
@@ -180,7 +181,7 @@ class Calendar():
         with open(name+".ical", "w") as calFile:
             calFile.write(self.icalObj.to_ical().decode("utf-8"))
     
-    def createEvents(self, course):
+    def createEvents_ical(self, course):
         day = self.start
         while day != self.end + datetime.timedelta(days=1):
             #for each day check every slot
@@ -197,6 +198,12 @@ class Calendar():
                     self.icalObj.add_component(event)
             
             day += datetime.timedelta(days = 1)
+    def saveToIcal(self, filename ="cal.ical"):
+        #assuming empty self.ical object is empty
+        for course in self.courses:
+            self.createEvents_ical(course)
+        self.saveIcal(filename)
+        
 
 #TODO add exams functionality
 
