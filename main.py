@@ -3,8 +3,10 @@ from APITest import createEvent
 import json 
 from easygui import *
 
+d = {}
+
 days = {
-    "Sunday" : 0,
+    "Sunday": 0,
     "Monday" : 1,
     "Tuesday" : 2,
     "Wednesday":3,
@@ -12,8 +14,8 @@ days = {
     "Friday" : 5,
     "Saturday" : 6,
 }
-
 class Slot():
+
     def __init__(self,slotName:str,slotTimes:np.array,course=None,rec="WEEKLY") -> None:
         self.slotName = slotName
         self.slotTimes = slotTimes
@@ -42,6 +44,7 @@ class Slot():
     
 
 class Course():
+
     def __init__(self,courseName:str,slot:Slot,loc="",desc=None) -> None:
         self.courseName = courseName
         self.slot = slot
@@ -91,19 +94,17 @@ def createCourse():
     text = "Enter the following details"
     title = "Slot Creation Window"  
     input_list = ["Slot Name : ",]
-    #SlotDetails = multenterbox(text, title, input_list)
-    SlotDetails = ["A"]
+    SlotDetails = multenterbox(text, title, input_list)
+    #ils = ["A"]
     input_list = []
     for i in days:
         input_list.extend([i + "Start ", i + " End"])
-    #SlotTimes = np.array(multenterbox(text,title,input_list))
-    SlotTimes = np.array(['', '', '08:00', '08:50', '13:00', '13:50', '', '', '11:00', '11:50', '10:00',
- '10:50', '', '',]).reshape(7,2)
+    SlotTimes = np.array(multenterbox(text,title,input_list))
+    #SlotTimes = np.array(['', '', '08:00', '08:50', '13:00', '13:50', '', '', '11:00', '11:50', '10:00',
+# '10:50', '', '',]).reshape(7,2)
     course_1 = Slot(SlotDetails[0],SlotTimes)
-    course_1.save()
+    d[SlotDetails] = course_1
+    
 
-with open("slots.json","r") as f: 
-    l = json.load(f)
-    print(l)
 
-createSlot()
+
