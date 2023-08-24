@@ -73,12 +73,12 @@ class Slot():
         text = "Enter the following details"
         title = "Slot Creation Window"
         input_list = ["Slot Name : ", ]
-        self.slotName = multenterbox(text, title, input_list)[0]
+        self.slotName = multenterbox(text, title, input_list)[0] #string like "A"
         input_list = []
         for i in days:
             input_list.extend([i + "Start ", i + " End"])
         text = "Enter the following details: (Leave blank if not required/ Fill in 24 hour format, for eg: 13:00)"
-        self._slotTimes = np.array(multenterbox(text, title, input_list)).reshape(7, 2)
+        self._slotTimes = np.array(multenterbox(text, title, input_list)).reshape(7, 2) #[[0800, 0900], [0900, 1000],[1000, 1100],[1100, 1200],[1200, 1300],[1300, 1400],[1400, 1500]]
         self.slotTimes = []
         for i in range(0, len(self.slotTimes), 2):
             startTime = datetime.time(int(self._slotTimes[i][0] // 100), int(self._slotTimes[i][0] % 100))
@@ -161,9 +161,9 @@ class Course():
         text = "Enter the following details"
         title = "Course Creation Window"
         choices = list(SLOTS.keys())
-        input_list = ["Course Name : ", "Description :", "Location :"]
+        input_list = ["Course Name : ", "Description :", "Location :"] # ["A", "Description", "Location"]
         courseName, desc, loc = multenterbox(text, title, input_list)
-        slot = SLOTS[choicebox("Select the slot", "Slot Selection", choices)]
+        slot = SLOTS[choicebox("Select the slot", "Slot Selection", choices)] # just a string of the slot name like "A"
         return Course(courseName, slot,loc,desc)
     def __repr__(self) -> str:
         return self.courseName
