@@ -23,15 +23,15 @@ days = {
 SLOTFILE = "slot.txt"
 
 FILES = os.listdir("./slots")
-SLOTS = {}
+SLOTS = {"":""}
 
 
 class Slot():
-    def __init__(self, slotName: str, slotTimes: "np.array of TimeRange",
-                 rec="WEEKLY") -> None:  # I suggest slotTimes as type WeekTime
+    def __init__(self, slotName: str, slotTimes: "np.array of TimeRange",rec="WEEKLY",course=False) -> None: 
         self.slotName = slotName
         self.slotTimes = slotTimes
         self.rec = rec
+        self.course = course
         if self.course:
             self.occupied = True
 
@@ -69,29 +69,31 @@ class Slot():
         slotfile.write("SLOT END\n")
         slotfile.close()
 
-    def fromGui(self):
+    def fromGui():
         text = "Enter the following details"
         title = "Slot Creation Window"
         input_list = ["Slot Name : ", ]
-        self.slotName = multenterbox(text, title, input_list)[0] #string like "A"
+        slotName = multenterbox(text, title, input_list)[0] #string like "A"
         input_list = []
         for i in days:
             input_list.extend([i + "Start ", i + " End"])
-        text = "Enter the following details: (Leave blank if not required/ Fill in 24 hour format, for eg: 13:00)"
-        self._slotTimes = np.array(multenterbox(text, title, input_list)).reshape(7, 2) #[[0800, 0900], [0900, 1000],[1000, 1100],[1100, 1200],[1200, 1300],[1300, 1400],[1400, 1500]]
-        self.slotTimes = []
-        for i in range(0, len(self.slotTimes), 2):
-            startTime = datetime.time(int(self._slotTimes[i][0] // 100), int(self._slotTimes[i][0] % 100))
-            endTime = datetime.time(int(self._slotTimes[i][1] // 100), int(self._slotTimes[i][1] % 100))
-            self.slotTimes.append(TimeRange(days[i], startTime, endTime))
-        self.rec = "WEEKLY"
-        self.save()
-        return Slot(self.slotName, self.slotTimes)
+        text = "Enter the following details: (Leave blank if not required/ Fill in 24 hour format, f(or eg: 1300)"
+        _slotTimes = np.array(multenterbox(text, title, input_list)).reshape(7, 2)#[[0800, 0900], [0900, 1000],[1000, 1100],[1100, 1200],[1200, 1300],[1300, 1400],[1400, 1500]]
+        print(_slotTimes)
+        slotTimes = []
+        for i in range(len(_slotTimes)):
+            startTime = datetime.time(int(_slotTimes[i][0]) // 100, int(_slotTimes[i][0]) % 100)
+            endTime = datetime.time(int(_slotTimes[i][1]) // 100, int(_slotTimes[i][1]) % 100)
+            time = TimeRange(i, startTime, endTime)
+            print(time)
+            slotTimes.append(time)
+        print(slotTimes)
+        return Slot(slotName, slotTimes)
 
     def loadSlots():
         # updates SLOTS and returns it too
 
-        d = {}
+        d = {"<select a slot>":None}
         for i in FILES:
             with open(f"./slots/{i}", "r") as file:
                 while True:
@@ -107,8 +109,8 @@ class Slot():
                                 day = int(file.readline().strip())
                                 start = str(file.readline().strip())
                                 end = str(file.readline().strip())
-                                startTime = datetime.datetime.strptime(start, '%H%M').time()
-                                endTime = datetime.datetime.strptime(end, '%H%M').time()
+                                startTime = datetime.datetime.strptime(start, '%H:%M:%S').time()
+                                endTime = datetime.datetime.strptime(end, '%H:%M:%S').time()
                                 slotTimes.append(TimeRange(day, startTime, endTime))
                             line = file.readline().strip()
                         else:
@@ -139,14 +141,15 @@ class TimeRange():
 
     def getEnd(self):
         return self.endTime
-
+    def getDay(self):
+        return self.day
 
 # class Rule():
 #     def __init__(self, condition, contents: dict):
 #         self.content = contents
 #         self.condition =condition
 
-class Course():
+class Course:
     def __init__(self, courseName: str, slot: Slot, loc="", desc="") -> None:
         self.courseName = courseName
         self.slot = slot
@@ -163,8 +166,12 @@ class Course():
         choices = list(SLOTS.keys())
         input_list = ["Course Name : ", "Description :", "Location :"] # ["A", "Description", "Location"]
         courseName, desc, loc = multenterbox(text, title, input_list)
-        slot = SLOTS[choicebox("Select the slot", "Slot Selection", choices)] # just a string of the slot name like "A"
-        return Course(courseName, slot,loc,desc)
+        slot = None
+        while slot is None:
+            slot = SLOTS[choicebox("Select the slot", "Slot Selection", choices)]# just a string of the slot name like "A"
+        course = Course(courseName, slot,loc,desc)
+        print(type(course))
+        return course
     def __repr__(self) -> str:
         return self.courseName
 
@@ -199,10 +206,10 @@ class Calendar():
         self.icalObj = icalobj  # TODO
 
     def addCourse(self, course: Course) -> None:
-        self.courses.append(Course)
+        self.courses.append(course)
 
     def saveIcal(self, name="cal"):
-        with open(name + ".ical", "w") as calFile:
+        with open(name, "w") as calFile:
             calFile.write(self.icalObj.to_ical().decode("utf-8"))
 
     def createEvents_ical(self, course):
@@ -224,7 +231,7 @@ class Calendar():
             day += datetime.timedelta(days=1)
 
     def createIcalobj(self, filename="cal.ical"):
-        # assuming empty self.ical object is empty
+        # assuming empty self.ical object is empty2222-2-
         for course in self.courses:
             self.createEvents_ical(course)
         self.saveIcal(filename)
@@ -243,21 +250,32 @@ slot.save()
 start = datetime.datetime.strptime(multenterbox("Fill the start and end date","Start Date",["Start",])[0], '%Y-%m-%d')
 end = datetime.datetime.strptime(multenterbox("Fill the start and end date","End Date",["End",])[0], '%Y-%m-%d')
 
-Slot.loadSlots()
+# start, end=0, 0
+# Slot.loadSlots()
+
+# choicelist=["Create Course", "Export to Ical", "Create Slot", "Upload to Google Calendar", "Exit"] 
+#TODO implement create slot
+choicelist=["Create Course", "Export to Ical", "Upload to Google Calendar", "Exit"]
+
 
 if __name__ == '__main__':
     CALOBJ = Calendar(start, end)
     while True:
+        Slot.loadSlots()
         choice = choicebox("Welcome to calendar app, Please choose one of the options", "Time Table App",
-                           ["Create Course", "Export to Ical", "Create Slot", "Upload to Google Calendar", "Exit"])
+                           choicelist)
         if choice == "Create Course":
-            course = Course.fromGui()  # Need to update slots when this is called. after start of loop, new slot could have been created.
-            CALOBJ.addCourse(course)
-        elif choice == "Create Slot":
-            slot = Slot.fromGui()
-            slot.save()  # not done automatically in __init__ as loaded slots will be saved again.
+            try:
+                course = Course.fromGui()  # Need to update slots when this is called. after start of loop, new slot could have been created.
+                CALOBJ.addCourse(course)
+                print()
+            except ValueError:
+                ynbox("You need to add atleast 1 slot")
+        # elif choice == "Create Slot":
+        #     slot = Slot.fromGui()
+        #     slot.save() 
         elif choice == "Export to Ical":
-            filename = 0  # TODO gui
+            filename = filesavebox("Please browse where to save .ical")  # TODO gui
             CALOBJ.createIcalobj()
             CALOBJ.saveIcal(filename)
             # TODO export file to user
